@@ -214,21 +214,28 @@
 
             // Small delay to prevent immediate re-triggering logic issues
             setTimeout(() => {
-                const padding = 20; // Keep away from edges
+                const padding = 20; // Safe distance from edges
                 const btnWidth = btn.offsetWidth;
                 const btnHeight = btn.offsetHeight;
 
-                // Calculate Available Space
-                const maxX = window.innerWidth - btnWidth - padding;
-                const maxY = window.innerHeight - btnHeight - padding;
+                // Get current window dimensions
+                const winWidth = window.innerWidth;
+                const winHeight = window.innerHeight;
 
-                // Generate new coordinates far away
-                // Simple random for now is effective enough, but let's ensure it's not the exact same spot
-                const newX = Math.max(padding, Math.random() * maxX);
-                const newY = Math.max(padding, Math.random() * maxY);
+                // Calculate maximum allowed positions
+                const maxLeft = winWidth - btnWidth - padding;
+                const maxTop = winHeight - btnHeight - padding;
 
-                btn.style.left = `${newX}px`;
-                btn.style.top = `${newY}px`;
+                // Generate random position
+                let newLeft = Math.random() * maxLeft;
+                let newTop = Math.random() * maxTop;
+
+                // Ensure strict bounds (cannot be less than padding, cannot be more than max)
+                newLeft = Math.max(padding, Math.min(newLeft, maxLeft));
+                newTop = Math.max(padding, Math.min(newTop, maxTop));
+
+                btn.style.left = `${newLeft}px`;
+                btn.style.top = `${newTop}px`;
             }, 50);
         }
 
@@ -253,11 +260,11 @@
             // 2. Show Success UI
             successUi.classList.remove('hidden');
 
-            // 3. Fire Confetti
+            // 3. Fire Confetti (First Burst)
             fireConfetti();
 
-            // 4. Fire more confetti
-            setInterval(fireConfetti, 2500);
+            // 4. Fire Second Burst after a delay
+            setTimeout(fireConfetti, 2500);
         });
 
         function fireConfetti() {
