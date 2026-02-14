@@ -141,10 +141,25 @@
             }
         }
 
+        /* Constraint Box */
+        #constraint-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            pointer-events: none;
+            /* Let clicks pass through */
+            z-index: 9000;
+            /* border: 2px solid red;  Uncomment to see the box for debugging */
+        }
+
         /* Playful Message Styles */
         #playful-message {
             position: fixed;
             top: -100px;
+            /* Start off screen */
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
@@ -154,43 +169,25 @@
             font-size: 1.5rem;
             font-weight: bold;
             box-shadow: 0 10px 40px rgba(255, 107, 157, 0.4);
-            z-index: 10000;
+            z-index: 10001;
+            /* Highest priority */
             white-space: nowrap;
             opacity: 0;
+            transition: top 0.5s ease-out, opacity 0.5s ease-out;
             pointer-events: none;
         }
 
-        #playful-message.show {
-            animation: slideInFromTop 0.6s ease-out forwards, fadeOutAfterDelay 0.8s ease-in 3.2s forwards;
-        }
-
-        @keyframes slideInFromTop {
-            0% {
-                top: -100px;
-                opacity: 0;
-            }
-
-            100% {
-                top: 40px;
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeOutAfterDelay {
-            0% {
-                opacity: 1;
-                top: 40px;
-            }
-
-            100% {
-                opacity: 0;
-                top: -100px;
-            }
+        #playful-message.active {
+            top: 40px !important;
+            opacity: 1 !important;
         }
     </style>
 </head>
 
 <body>
+    <!-- Constraint Box -->
+    <div id="constraint-box"></div>
+
     <!-- Playful Message -->
     <div id="playful-message">Nice try, don't be silly, PICK AGAIN!</div>
 
@@ -252,75 +249,63 @@
         let hasMovedMaybe = false;
         let hasMovedNo = false;
 
+        const constraintBox = document.getElementById('constraint-box');
+
         function moveButton(btn) {
-            // 1. DETACH FROM CARD: Move to body to ensure coordinates match the window (fixes disappearing bug)
+            // 1. Ensure button is fixed to body for accurate positioning
             if (btn.parentNode !== document.body) {
                 const rect = btn.getBoundingClientRect();
-
                 document.body.appendChild(btn);
-
                 btn.style.position = 'fixed';
                 btn.style.left = rect.left + 'px';
                 btn.style.top = rect.top + 'px';
-                btn.style.zIndex = '9999'; // Always on top
-                btn.style.transition = 'left 0.4s ease-out, top 0.4s ease-out'; // SMOOTH movement so eyes can track it
+                btn.style.zIndex = '9999';
+                btn.style.transition = 'left 0.4s ease-out, top 0.4s ease-out';
             }
 
-            // Small delay allows the DOM to update if we just moved it
             setTimeout(() => {
-                const padding = 80; // LARGE padding to keep well away from edges
+                // 2. Get the "Invisible Fence" boundaries
+                const boxRect = constraintBox.getBoundingClientRect();
                 const btnWidth = btn.offsetWidth;
                 const btnHeight = btn.offsetHeight;
 
-                const winWidth = window.innerWidth;
-                const winHeight = window.innerHeight;
+                // 3. Calculate strictly inside the box
+                // Random X between Box Left and Box Right (minus button width)
+                const minX = boxRect.left;
+                const maxX = boxRect.right - btnWidth;
 
-                // Calculate safe zone
-                const minLeft = padding;
-                const maxLeft = winWidth - btnWidth - padding;
-                const minTop = padding;
-                const maxTop = winHeight - btnHeight - padding;
+                // Random Y between Box Top and Box Bottom (minus button height)
+                const minY = boxRect.top;
+                const maxY = boxRect.bottom - btnHeight;
 
-                // Generate random position within safe zone
-                let newLeft = minLeft + Math.random() * (maxLeft - minLeft);
-                let newTop = minTop + Math.random() * (maxTop - minTop);
+                // Generate coordinates
+                let newLeft = minX + Math.random() * (maxX - minX);
+                let newTop = minY + Math.random() * (maxY - minY);
 
-                // DEFENSIVE: Absolutely clamp to safe bounds (should never trigger, but just in case)
-                newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
-                newTop = Math.max(minTop, Math.min(newTop, maxTop));
-
-                // Extra safety check - if somehow still invalid, center it
-                if (newLeft < 0 || newLeft + btnWidth > winWidth) {
-                    newLeft = (winWidth - btnWidth) / 2;
-                }
-                if (newTop < 0 || newTop + btnHeight > winHeight) {
-                    newTop = (winHeight - btnHeight) / 2;
-                }
-
+                // 4. Apply
                 btn.style.left = `${newLeft}px`;
                 btn.style.top = `${newTop}px`;
             }, 10);
         }
 
-        // Playful message functionality
+        // --- Playful Message Logic (Simplified for Reliability) ---
         const playfulMessage = document.getElementById('playful-message');
         let messageTimeout;
 
         function showPlayfulMessage() {
-            // Clear any existing timeout
             if (messageTimeout) {
                 clearTimeout(messageTimeout);
             }
-            
+
             // Remove the class first to reset animation
             playfulMessage.classList.remove('show');
-            
+
             // Force reflow to restart animation
             void playfulMessage.offsetWidth;
-            
+
             // Add the class to trigger animation
             playfulMessage.classList.add('show');
-            
+
             // Remove the class after 4 seconds
             messageTimeout = setTimeout(() => {
                 playfulMessage.classList.remove('show');
