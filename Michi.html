@@ -204,39 +204,41 @@
         let hasMovedNo = false;
 
         function moveButton(btn) {
-            // Set position to fixed on first move so it can fly anywhere on screen
-            if (btn.style.position !== 'fixed') {
+            // 1. DETACH FROM CARD: Move to body to ensure coordinates match the window (fixes disappearing bug)
+            if (btn.parentNode !== document.body) {
                 const rect = btn.getBoundingClientRect();
+
+                document.body.appendChild(btn);
+
                 btn.style.position = 'fixed';
                 btn.style.left = rect.left + 'px';
                 btn.style.top = rect.top + 'px';
+                btn.style.zIndex = '9999'; // Always on top
+                btn.style.transition = 'left 0.4s ease-out, top 0.4s ease-out'; // SMOOTH movement so eyes can track it
             }
 
-            // Small delay to prevent immediate re-triggering logic issues
+            // Small delay allows the DOM to update if we just moved it
             setTimeout(() => {
-                const padding = 20; // Safe distance from edges
+                const padding = 20;
                 const btnWidth = btn.offsetWidth;
                 const btnHeight = btn.offsetHeight;
 
-                // Get current window dimensions
                 const winWidth = window.innerWidth;
                 const winHeight = window.innerHeight;
 
-                // Calculate maximum allowed positions
                 const maxLeft = winWidth - btnWidth - padding;
                 const maxTop = winHeight - btnHeight - padding;
 
-                // Generate random position
                 let newLeft = Math.random() * maxLeft;
                 let newTop = Math.random() * maxTop;
 
-                // Ensure strict bounds (cannot be less than padding, cannot be more than max)
+                // Strict bounds
                 newLeft = Math.max(padding, Math.min(newLeft, maxLeft));
                 newTop = Math.max(padding, Math.min(newTop, maxTop));
 
                 btn.style.left = `${newLeft}px`;
                 btn.style.top = `${newTop}px`;
-            }, 50);
+            }, 10);
         }
 
         // Add event listeners to BOTH "Maybe" and "No"
