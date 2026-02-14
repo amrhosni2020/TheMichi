@@ -219,22 +219,34 @@
 
             // Small delay allows the DOM to update if we just moved it
             setTimeout(() => {
-                const padding = 20;
+                const padding = 80; // LARGE padding to keep well away from edges
                 const btnWidth = btn.offsetWidth;
                 const btnHeight = btn.offsetHeight;
 
                 const winWidth = window.innerWidth;
                 const winHeight = window.innerHeight;
 
+                // Calculate safe zone
+                const minLeft = padding;
                 const maxLeft = winWidth - btnWidth - padding;
+                const minTop = padding;
                 const maxTop = winHeight - btnHeight - padding;
 
-                let newLeft = Math.random() * maxLeft;
-                let newTop = Math.random() * maxTop;
+                // Generate random position within safe zone
+                let newLeft = minLeft + Math.random() * (maxLeft - minLeft);
+                let newTop = minTop + Math.random() * (maxTop - minTop);
 
-                // Strict bounds
-                newLeft = Math.max(padding, Math.min(newLeft, maxLeft));
-                newTop = Math.max(padding, Math.min(newTop, maxTop));
+                // DEFENSIVE: Absolutely clamp to safe bounds (should never trigger, but just in case)
+                newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
+                newTop = Math.max(minTop, Math.min(newTop, maxTop));
+
+                // Extra safety check - if somehow still invalid, center it
+                if (newLeft < 0 || newLeft + btnWidth > winWidth) {
+                    newLeft = (winWidth - btnWidth) / 2;
+                }
+                if (newTop < 0 || newTop + btnHeight > winHeight) {
+                    newTop = (winHeight - btnHeight) / 2;
+                }
 
                 btn.style.left = `${newLeft}px`;
                 btn.style.top = `${newTop}px`;
