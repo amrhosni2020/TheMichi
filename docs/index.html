@@ -152,7 +152,7 @@
             pointer-events: none;
             /* Let clicks pass through */
             z-index: 9000;
-            border: 2px solid red;
+            /* border: 2px solid red; */
             /* Debug: See the box */
         }
 
@@ -304,10 +304,10 @@
             // Force visibility
             playfulMessage.classList.add('active');
 
-            // Hide after 4 seconds
+            // Hide after 3 seconds
             messageTimeout = setTimeout(() => {
-                playfulMessage.classList.remove('show');
-            }, 4000);
+                playfulMessage.classList.remove('active');
+            }, 3000);
         }
 
         // Add event listeners to BOTH "Maybe" and "No"
