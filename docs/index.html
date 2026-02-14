@@ -152,14 +152,14 @@
             pointer-events: none;
             /* Let clicks pass through */
             z-index: 9000;
-            /* border: 2px solid red;  Uncomment to see the box for debugging */
+            border: 2px solid red;
+            /* Debug: See the box */
         }
 
         /* Playful Message Styles */
         #playful-message {
             position: fixed;
-            top: -100px;
-            /* Start off screen */
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
@@ -169,17 +169,22 @@
             font-size: 1.5rem;
             font-weight: bold;
             box-shadow: 0 10px 40px rgba(255, 107, 157, 0.4);
-            z-index: 10001;
-            /* Highest priority */
+            z-index: 2147483647;
+            /* MAX Z-INDEX to guarantee visibility */
             white-space: nowrap;
+
+            /* Hidden state */
             opacity: 0;
-            transition: top 0.5s ease-out, opacity 0.5s ease-out;
+            visibility: hidden;
+            transition: all 0.3s ease;
             pointer-events: none;
         }
 
         #playful-message.active {
-            top: 40px !important;
             opacity: 1 !important;
+            visibility: visible !important;
+            top: 50px !important;
+            /* Slide down slightly */
         }
     </style>
 </head>
@@ -293,20 +298,13 @@
         let messageTimeout;
 
         function showPlayfulMessage() {
-            if (messageTimeout) {
-                clearTimeout(messageTimeout);
-            }
+            // Clear existing timeout to reset the timer
+            if (messageTimeout) clearTimeout(messageTimeout);
 
-            // Remove the class first to reset animation
-            playfulMessage.classList.remove('show');
+            // Force visibility
+            playfulMessage.classList.add('active');
 
-            // Force reflow to restart animation
-            void playfulMessage.offsetWidth;
-
-            // Add the class to trigger animation
-            playfulMessage.classList.add('show');
-
-            // Remove the class after 4 seconds
+            // Hide after 4 seconds
             messageTimeout = setTimeout(() => {
                 playfulMessage.classList.remove('show');
             }, 4000);
