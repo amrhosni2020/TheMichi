@@ -333,13 +333,17 @@
             // 1. Hide Question UI
             questionUi.classList.add('hidden');
 
-            // 2. Show Success UI
+            // 2. FORCE HIDE floating buttons (because they might be on the body now)
+            maybeBtn.style.display = 'none';
+            noBtn.style.display = 'none';
+
+            // 3. Show Success UI
             successUi.classList.remove('hidden');
 
-            // 3. Fire Confetti (First Burst)
+            // 4. Fire Confetti (First Burst)
             fireConfetti();
 
-            // 4. Fire Second Burst after a delay
+            // 5. Fire Second Burst after a delay
             setTimeout(fireConfetti, 2500);
         });
 
